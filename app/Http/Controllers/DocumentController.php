@@ -92,12 +92,13 @@ class DocumentController extends Controller
     
             // Cari similarity tertinggi
             $highest = collect($comparisons)->sortByDesc('similarity')->first();
-    
+            log::info('Hasil similarity tertinggi:', $highest);
             // Redirect ke view dengan hasil similarity
             return redirect()->back()->with('result', [
                 'highest_similarity' => $highest,
                 'comparisons' => $comparisons,
             ]);
+
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }

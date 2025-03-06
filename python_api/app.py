@@ -74,10 +74,10 @@ def preprocess():
 
 @app.route('/check-plagiarism', methods=['POST'])
 def check_plagiarism():
-    print("Received Headers:", request.headers)
-    print("Received Files:", request.files)
-    print("Received Form:", request.form)
-    print("Received JSON:", request.get_json(silent=True))
+    # print("Received Headers:", request.headers)
+    # print("Received Files:", request.files)
+    # print("Received Form:", request.form)
+    # print("Received JSON:", request.get_json(silent=True))
 
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
@@ -96,7 +96,7 @@ def check_plagiarism():
 
         # Ambil references dari request form
         references_data = request.form.get('references', None) 
-
+        print(f"References data: {references_data}")
         if not references_data:
             return jsonify({'error': 'References are required'}), 400
 
