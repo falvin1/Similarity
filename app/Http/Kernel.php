@@ -8,10 +8,11 @@ class Kernel extends HttpKernel
 {
     protected $middlewareGroups = [
         'api' => [
-            \App\Http\Middleware\HandleCors::class, // Tambahkan middleware CORS
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, // KOMENTAR INI DULU
+            \App\Http\Middleware\HandleCors::class, 
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, 
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+    
         ],
     ];
     

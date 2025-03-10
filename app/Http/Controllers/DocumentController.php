@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Document;
 use Illuminate\Http\Request;
+use App\Models\DocumentHistory;
 use App\Models\ReferenceDocument;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
-use Smalot\PdfParser\Parser; // Import PDF Parser
 use Illuminate\Support\Facades\Redirect;
+use Smalot\PdfParser\Parser; // Import PDF Parser
 
 class DocumentController extends Controller
 {
@@ -17,7 +19,6 @@ class DocumentController extends Controller
 
     public function upload(Request $request)
     {
-        Log::info('Upload API accessed', ['headers' => $request->headers->all()]);
         $request->validate([
             'file' => 'required|mimes:pdf|max:2048',
         ]);
@@ -40,6 +41,7 @@ class DocumentController extends Controller
     
             // Simpan dokumen ke database
             $document = Document::create([
+                'user_id' => Auth::id(), 
                 'title' => $file->getClientOriginalName(),
                 'content' => $responseData['original_text'] ?? '',
                 'preprocessed_content' => $responseData['preprocessed_text'] ?? '',
@@ -66,22 +68,19 @@ class DocumentController extends Controller
             }
     
             // Tambahkan Log untuk Debugging
-            Log::info('References Data (Before Sending):', ['references' => $referencesData]);
-    
-            Log::info('Sending to Flask', ['references' => $referencesData]);
+
     
             // Kirim ke Flask untuk pengecekan plagiarisme (multipart/form-data untuk file, JSON untuk references)
             $formattedReferences = ['references' => $referencesData];
             $jsonString = json_encode($formattedReferences);
-            Log::debug('Final formatted references being sent: ' . $jsonString);   
+
     
             $plagiarismResponse = Http::withoutVerifying()
                 ->attach('file', file_get_contents($file->getRealPath()), $file->getClientOriginalName())
                 ->post('http://127.0.0.1:5000/check-plagiarism', [
                     'references' => $jsonString,
                 ]);
-    
-            Log::info('Response dari Flask:', $plagiarismResponse->json());
+
     
             if ($plagiarismResponse->failed()) {
                 return redirect()->back()->with('error', 'Gagal memeriksa plagiarisme dengan Flask');
@@ -92,7 +91,16 @@ class DocumentController extends Controller
     
             // Cari similarity tertinggi
             $highest = collect($comparisons)->sortByDesc('similarity')->first();
-            log::info('Hasil similarity tertinggi:', $highest);
+            if ($highest) {
+                $document->similarity_percentage = $highest['similarity'];
+                $document->save();
+            }
+            
+            DocumentHistory::create([
+                'user_id' => Auth::id(),
+                'document_id' => $document->id,
+                'similarity_percentage' => $highest['similarity'] ?? null,
+            ]);
             // Redirect ke view dengan hasil similarity
             return redirect()->back()->with('result', [
                 'highest_similarity' => $highest,

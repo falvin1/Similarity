@@ -96,7 +96,7 @@ def check_plagiarism():
 
         # Ambil references dari request form
         references_data = request.form.get('references', None) 
-        print(f"References data: {references_data}")
+
         if not references_data:
             return jsonify({'error': 'References are required'}), 400
 
@@ -110,7 +110,7 @@ def check_plagiarism():
 
         vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(all_texts)
-
+        
         uploaded_vector = tfidf_matrix[0]
 
         comparisons = []

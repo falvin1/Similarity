@@ -5,12 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Document extends Model {
+class DocumentHistory extends Model {
     use HasFactory;
 
-    protected $fillable = ['title', 'content', 'preprocessed_content', 'file_path', 'user_id', 'similarity_percentage'];
+    protected $fillable = ['user_id', 'document_id', 'similarity_percentage'];
 
     public function user() {
         return $this->belongsTo(User::class);
+    }
+
+    public function document() {
+        return $this->belongsTo(Document::class);
     }
 }
