@@ -21,6 +21,12 @@ class ProfileController extends Controller
         ]);
     }
 
+    public function editAdmin(Request $request): View
+    {
+        return view('admin.profile.edit', [
+            'user' => $request->user(),
+        ]);
+    }
     /**
      * Update the user's profile information.
      */
@@ -34,6 +40,9 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        if (Auth::user()->role === 'admin') {
+            return redirect()->route('admin.profile.edit')->with('status', 'profile-updated');
+        }
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 

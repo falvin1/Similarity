@@ -4,7 +4,7 @@
         <span class="ml-2">PlagCheck</span>
     </div>
     <div class="flex items-center space-x-6">
-        <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-black">Dashboard</a>
+        <a href="{{ route(Auth::user()->role === 'admin' ? 'admin.dashboard' : 'dashboard') }}" class="text-gray-600 hover:text-black">Dashboard</a>
         <a href="{{ route('history.index') }}" class="text-gray-600 hover:text-black">History</a>
         <div class="relative">
             <button id="userMenuButton" class="flex items-center space-x-2 focus:outline-none">
