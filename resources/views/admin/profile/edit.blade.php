@@ -20,8 +20,7 @@
                     <div class="flex items-center mb-4">
 
                     </div>
-
-                    
+            
                     @include('profile.partials.update-profile-information-form')
                 </div>
                 

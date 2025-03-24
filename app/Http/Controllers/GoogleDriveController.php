@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Http;
 use App\Models\ReferenceDocument;
+use Illuminate\Support\Facades\Log;
+
 
 class GoogleDriveController extends Controller
 {
@@ -49,6 +51,14 @@ class GoogleDriveController extends Controller
                         ->first();
 
                     if ($existingFile) {
+                        
+                        if (!$existingFile->file_id || !$existingFile->google_drive_link) {
+                            $existingFile->update([
+                                'file_id' => $fileId,
+                                'google_drive_link' => "https://drive.google.com/file/d/{$fileId}/view",
+                            ]);
+                        }
+                        
                         $skippedFiles[] = $fileName; // Tambahkan ke daftar file yang dilewati
                         continue; // Skip ke file berikutnya
                     }
@@ -75,17 +85,24 @@ class GoogleDriveController extends Controller
                     }
 
                     $responseData = $response->json();
+                    $googleDriveLink = "https://drive.google.com/file/d/{$fileId}/view";
 
                     // 💾 Simpan ke database
                     $reference = ReferenceDocument::updateOrCreate(
                         ['title' => $fileName],
                         [
-                            'file_path' => $savePath,
+                            'file_id' => $fileId, 
+                            'file_path' => $savePath, 
+                            'google_drive_link' => $googleDriveLink,
                             'content' => $responseData['original_text'] ?? '',
                             'preprocessed_content' => $responseData['preprocessed_text'] ?? '',
                         ]
                     );
-
+                    Log::info("UpdateOrCreate called for: " . $fileName, [
+                        'file_id' => $fileId,
+                        'file_path' => $savePath,
+                        'google_drive_link' => $googleDriveLink,
+                    ]);
                     $savedFiles[] = $reference;
                 }
             }
@@ -94,6 +111,11 @@ class GoogleDriveController extends Controller
                 'message' => 'Files processed successfully',
                 'processed_files' => $savedFiles,
                 'skipped_files' => $skippedFiles,
+                'debug_info' => [
+                    'file_id' => $fileId ?? null,
+                    'file_path' => $savePath ?? null,
+                    'google_drive_link' => $googleDriveLink ?? null,
+                ]
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);

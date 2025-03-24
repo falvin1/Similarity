@@ -10,5 +10,6 @@ class ReferenceDocument extends Model {
 
     protected $table = 'reference_documents';
     
-    protected $fillable = ['title', 'content', 'preprocessed_content', 'file_path'];
+    protected $fillable = ['title', 'content', 'preprocessed_content', 'file_path'  ,  'file_id',
+    'google_drive_link',];
 }

@@ -10,7 +10,6 @@
 
     <x-navbar />
 
-
     <!-- Konten History -->
     <div class="container mx-auto p-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Riwayat Pengecekan Plagiarisme</h1>
@@ -25,6 +24,7 @@
                             <th class="border px-4 py-2">Judul</th>
                             <th class="border px-4 py-2">Similarity (%)</th>
                             <th class="border px-4 py-2">Tanggal</th>
+                            <th class="border px-4 py-2">Google Drive Link</th> <!-- Tambahkan kolom ini -->
                         </tr>
                     </thead>
                     <tbody>
@@ -33,6 +33,15 @@
                                 <td class="border px-4 py-2"><?= htmlspecialchars($history->document->title) ?></td>
                                 <td class="border px-4 py-2"><?= htmlspecialchars($history->similarity_percentage ?? '-') ?>%</td>
                                 <td class="border px-4 py-2"><?= htmlspecialchars($history->created_at->format('d M Y, H:i')) ?></td>
+                                <td class="border px-4 py-2 text-blue-600">
+                                    <?php if (isset($history->referenceDocument->google_drive_link)) : ?>
+                                        <a href="<?= htmlspecialchars($history->referenceDocument->google_drive_link) ?>" target="_blank" class="underline">
+                                            Lihat Dokumen
+                                        </a>
+                                    <?php else : ?>
+                                        <span class="text-gray-500">Tidak tersedia</span>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -40,6 +49,7 @@
             </div>
         <?php endif; ?>
     </div>
+
     <script>
         document.getElementById('userMenuButton').addEventListener('click', function () {
             document.getElementById('userMenu').classList.toggle('hidden');

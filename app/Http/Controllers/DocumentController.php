@@ -88,23 +88,34 @@ class DocumentController extends Controller
     
             $plagiarismResult = $plagiarismResponse->json();
             $comparisons = $plagiarismResult['comparisons'] ?? [];
-    
+            
+            
             // Cari similarity tertinggi
             $highest = collect($comparisons)->sortByDesc('similarity')->first();
             if ($highest) {
                 $document->similarity_percentage = $highest['similarity'];
+
+                $referenceDoc = ReferenceDocument::where('id', $highest['reference_id'])->first();
+                $googleDriveLink = $referenceDoc ? $referenceDoc->google_drive_link : null;
+                
                 $document->save();
+                $reference_id = $highest['reference_id'] ?? null;
+                DocumentHistory::create([
+                    'user_id' => Auth::id(),
+                    'document_id' => $document->id,
+                    'similarity_percentage' => $highest['similarity'] ?? null,
+                    'reference_document_id' => $reference_id,
+                ]);
             }
-            
-            DocumentHistory::create([
-                'user_id' => Auth::id(),
-                'document_id' => $document->id,
-                'similarity_percentage' => $highest['similarity'] ?? null,
-            ]);
+
+            $history = DocumentHistory::with('referenceDocument')->where('document_id', $document->id)->first();
+            $googleDriveLink_history = $history && $history->referenceDocument ? $history->referenceDocument->google_drive_link : null;
+
             // Redirect ke view dengan hasil similarity
             return redirect()->back()->with('result', [
                 'highest_similarity' => $highest,
                 'comparisons' => $comparisons,
+                'google_drive_link' => $googleDriveLink ?? null,
             ]);
 
         } catch (\Exception $e) {

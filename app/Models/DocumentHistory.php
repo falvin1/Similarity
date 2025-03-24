@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class DocumentHistory extends Model {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'document_id', 'similarity_percentage'];
+    protected $fillable = ['user_id', 'document_id', 'similarity_percentage','reference_document_id'];
 
     public function user() {
         return $this->belongsTo(User::class);
@@ -17,4 +17,8 @@ class DocumentHistory extends Model {
     public function document() {
         return $this->belongsTo(Document::class);
     }
+    public function referenceDocument()
+{
+    return $this->belongsTo(ReferenceDocument::class, 'reference_document_id');
+}
 }

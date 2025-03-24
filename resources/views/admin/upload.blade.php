@@ -78,16 +78,16 @@
             </div>
           </div>
         </div>
-        
+
         <!-- Tabs -->
         <div class="mt-8">
           <div class="border-b border-gray-200">
             <nav class="-mb-px flex">
-              <a href="dashboard" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+              <a href="dashboard" class="        border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
                 Recent Activity
               </a>
-              <a href="/admin/upload" class="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
-                Upload
+              <a href="upload" class="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm">
+                Uploads
               </a>
             </nav>
           </div>
@@ -102,14 +102,11 @@
             <!-- Document 1 -->
             <div class="flex items-start">
               <div class="bg-amber-100 p-3 rounded-md">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+                <button id="downloadFilesBtn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Download Files from Google Drive
+                </button>
               </div>
-              <div class="ml-4">
-                <h3 class="text-lg font-medium text-gray-800">Journal Article Submission</h3>
-                <p class="text-gray-600 text-sm">Submitted by Sarah Wilson • 18% similarity</p>
-                <p class="text-gray-500 text-xs mt-1">
+ 
 
                 </p>                
               </div>
@@ -128,4 +125,22 @@
         // Tampilkan konten Settings
         document.getElementById('settings-content').classList.remove('hidden');
     }
+
+
+document.getElementById('downloadFilesBtn').addEventListener('click', function() {
+    fetch("{{ route('download.files') }}")
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert("Success: " + data.message);
+        } else if (data.error) {
+            alert("Error: " + data.error);
+        }
+    })
+    .catch(error => {
+        alert("Something went wrong!");
+        console.error(error);
+    });
+});
+
 </script>

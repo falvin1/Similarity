@@ -40,6 +40,11 @@
                     <h3 class="text-lg font-semibold text-gray-900">Hasil Pemeriksaan Plagiarisme</h3>
                     <p class="text-gray-700 mt-2"><strong>Similarity Tertinggi:</strong> {{ session('result')['highest_similarity']['similarity'] }}%</p>
                     <p class="text-gray-700"><strong>Referensi dengan Similarity Tertinggi:</strong> {{ session('result')['highest_similarity']['reference_title'] }}</p>
+                   
+                        <p class="text-gray-700 mt-2"><strong>Link Google Drive:</strong> 
+                            <a href="{{ optional(session('result'))['google_drive_link'] }}" class="text-blue-500 underline" target="_blank">Lihat Dokumen</a>
+
+                    
                     
                     <h4 class="text-gray-800 font-semibold mt-4">Perbandingan dengan Referensi:</h4>
                     <ul class="list-disc list-inside text-gray-700">
@@ -49,6 +54,7 @@
                     </ul>
                 </div>
             @endif
+
         </div>
     </div>
     
