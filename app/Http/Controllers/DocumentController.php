@@ -121,7 +121,32 @@ class DocumentController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-    }    public function list()
+    }    
+public function adminPage($page)
+    {
+        
+        $totalDocuments = Document::count();
+        $cleanDocuments = Document::where('similarity_percentage', '<=', 30)->count();
+        $suspiciousDocuments = Document::whereBetween('similarity_percentage', [31, 40])->count();
+        $plagiarizedDocuments = Document::where('similarity_percentage', '>', 40)->count();
+        
+        $documents = Document::latest()->take(3)->get();
+        $data = [
+            'totalDocuments' => $totalDocuments,
+            'cleanDocuments' => $cleanDocuments,
+            'suspiciousDocuments' => $suspiciousDocuments,
+            'plagiarizedDocuments' => $plagiarizedDocuments,
+            'documents'=>$documents,
+        ];
+        if ($page === 'dashboard') {
+            return view('admin.dashboard', $data);
+        } elseif ($page === 'upload') {
+            return view('admin.upload', $data);
+        }
+    
+        abort(404);
+    }
+    public function list()
     {
         $documents = Document::all();
     

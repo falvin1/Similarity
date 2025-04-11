@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard - Plagiarism Detection System</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <style>
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+  
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
 </head>
 <body class="bg-gray-100">
   <div class="flex h-screen">
@@ -19,11 +34,12 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
           <!-- Total Documents Card -->
+         <!-- Total Documents Card -->
           <div class="bg-white p-6 rounded-md shadow-sm border border-gray-100">
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-gray-600">Total Documents</p>
-                <h2 class="text-4xl font-bold text-gray-800 mt-2">8</h2>
+                <h2 class="text-4xl font-bold text-gray-800 mt-2">{{ $totalDocuments }}</h2>
               </div>
               <div class="bg-blue-100 p-3 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -38,7 +54,7 @@
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-gray-600">Clean Documents</p>
-                <h2 class="text-4xl font-bold text-green-600 mt-2">3</h2>
+                <h2 class="text-4xl font-bold text-green-600 mt-2">{{ $cleanDocuments }}</h2>
               </div>
               <div class="bg-green-100 p-3 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,7 +69,7 @@
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-gray-600">Suspicious Documents</p>
-                <h2 class="text-4xl font-bold text-amber-500 mt-2">2</h2>
+                <h2 class="text-4xl font-bold text-amber-500 mt-2">{{ $suspiciousDocuments }}</h2>
               </div>
               <div class="bg-amber-100 p-3 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -62,6 +78,7 @@
               </div>
             </div>
           </div>
+          
           
           <!-- Plagiarized Documents Card -->
           <div class="bg-white p-6 rounded-md shadow-sm border border-gray-100">
@@ -100,23 +117,30 @@
           
           <div class="mt-6 space-y-6">
             <!-- Document 1 -->
-            <div class="flex items-start">
-              <div class="bg-amber-100 p-3 rounded-md">
+            <div class="flex items-center gap-5">
                 <button id="downloadFilesBtn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
                     Download Files from Google Drive
                 </button>
+                
+                <div id="loadingIndicator" class="ml-4 hidden">
+                  <svg class="w-9 h-9 spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path opacity="0.2" fill-rule="evenodd" clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="#000000"/>
+                    <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="#000000"/>
+                  </svg>
               </div>
- 
-
-                </p>                
               </div>
             </div>
+
+            
+
             
           </div>
         </div>
       </div>
     </div>
 </body>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
     function showSettings() {
         // Sembunyikan konten lain (misalnya dashboard)
@@ -126,21 +150,55 @@
         document.getElementById('settings-content').classList.remove('hidden');
     }
 
-
 document.getElementById('downloadFilesBtn').addEventListener('click', function() {
+  let button = this;
+    let loadingIndicator = document.getElementById('loadingIndicator');
+
+    // Disable button and show loading spinner
+    button.disabled = true;
+    button.innerText = "Downloading...";
+    loadingIndicator.classList.remove('hidden');
+
     fetch("{{ route('download.files') }}")
     .then(response => response.json())
     .then(data => {
         if (data.message) {
-            alert("Success: " + data.message);
+            Toastify({
+              text: "Success: " + data.message,
+              duration: 3000,
+              newWindow: true,
+              close: true,
+              gravity: "top",
+              position: "right",
+              stopOnFocus: true,
+              style: {
+                background: "linear-gradient(to right, #00b09b, #96c93d)",
+              }
+            }).showToast();
         } else if (data.error) {
-            alert("Error: " + data.error);
+          Toastify({
+              text: "Error: " + data.message,
+              duration: 3000,
+              newWindow: true,
+              close: true,
+              gravity: "top",
+              position: "right",
+              stopOnFocus: true,
+              style: {
+                background: "linear-gradient(to right, #00b09b, #96c93d)",
+              }
+            }).showToast();
         }
     })
     .catch(error => {
         alert("Something went wrong!");
         console.error(error);
+    }).finally(() => {
+      button.disabled = false;
+        button.innerText = "Download Files from Google Drive";
+        loadingIndicator.classList.add('hidden');
     });
 });
 
 </script>
+

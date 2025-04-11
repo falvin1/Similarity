@@ -31,17 +31,13 @@ Route::middleware('auth:web', 'role:user')->group(function () {
 
 
 Route::middleware(['auth:web', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    
     Route::get('/admin/users', [UsersController::class, 'usersPage'])->name('admin.users');
     Route::get('/admin/profile', [ProfileController::class, 'editAdmin'])->name('admin.profile.edit');
     Route::patch('/admin/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
     Route::delete('/admin/profile', [ProfileController::class, 'destroy'])->name('admin.profile.destroy');
     Route::get('/download-files', [GoogleDriveController::class, 'downloadAndSaveToDatabase'])->name('download.files');
-    Route::get('/admin/upload', function() {
-        return view('admin.upload');
-    });
+    Route::get('/admin/{page}', [DocumentController::class, 'adminPage']);
     Route::get('/download-files', [GoogleDriveController::class, 'downloadAndSaveToDatabase'])->name('download.files');
 });
     

@@ -21,8 +21,7 @@
                 <!-- Search & Actions -->
                 <div class="flex flex-wrap gap-4 items-center mb-6">
                     <input type="text" placeholder="Search users..." class="flex-1 px-4 py-2 border rounded-md text-gray-700 focus:ring focus:ring-blue-300">
-                    <button class="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition">Filter</button>
-                    <button class="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition">+ Add User</button>
+
                 </div>
 
                 <!-- User Table -->
@@ -51,7 +50,6 @@
                                     </td>
                                     <td class="py-3 px-4">{{ $user->created_at->format('d/m/Y') }}</td>
                                     <td class="py-3 px-4 text-center">
-                                        <a href="#" class="text-blue-600 hover:underline">Edit</a>
                                         <a href="#" class="text-red-600 hover:underline ml-2">Delete</a>
                                     </td>
                                 </tr>

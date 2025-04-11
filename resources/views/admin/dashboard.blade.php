@@ -23,7 +23,7 @@
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-gray-600">Total Documents</p>
-                <h2 class="text-4xl font-bold text-gray-800 mt-2">8</h2>
+                <h2 class="text-4xl font-bold text-gray-800 mt-2">{{ $totalDocuments }}</h2>
               </div>
               <div class="bg-blue-100 p-3 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -38,7 +38,7 @@
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-gray-600">Clean Documents</p>
-                <h2 class="text-4xl font-bold text-green-600 mt-2">3</h2>
+                <h2 class="text-4xl font-bold text-green-600 mt-2">{{ $cleanDocuments }}</h2>
               </div>
               <div class="bg-green-100 p-3 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,7 +53,7 @@
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-gray-600">Suspicious Documents</p>
-                <h2 class="text-4xl font-bold text-amber-500 mt-2">2</h2>
+                <h2 class="text-4xl font-bold text-amber-500 mt-2">{{ $suspiciousDocuments }}</h2>
               </div>
               <div class="bg-amber-100 p-3 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -68,7 +68,7 @@
             <div class="flex justify-between items-center">
               <div>
                 <p class="text-gray-600">Plagiarized Documents</p>
-                <h2 class="text-4xl font-bold text-red-600 mt-2">3</h2>
+                <h2 class="text-4xl font-bold text-red-600 mt-2">{{ $plagiarizedDocuments }}</h2>
               </div>
               <div class="bg-red-100 p-3 rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,29 +92,28 @@
             </nav>
           </div>
         </div>
-        
-        <!-- Recent Documents -->
-        <div class="mt-6 bg-white rounded-md shadow-sm border border-gray-100 p-6">
-          <h2 class="text-xl font-bold text-gray-800">Recent Document Submissions</h2>
-          <p class="text-gray-600 text-sm mt-1">The latest documents submitted for plagiarism checking</p>
-          
-          <div class="mt-6 space-y-6">
-            <!-- Document 1 -->
-            <div class="flex items-start">
-              <div class="bg-amber-100 p-3 rounded-md">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
+              <!-- Recent Documents -->
+              <div class="mt-6 bg-white rounded-md shadow-sm border border-gray-100 p-6">
+                <h2 class="text-xl font-bold text-gray-800">Recent Document Submissions</h2>
+                <p class="text-gray-600 text-sm mt-1">The latest documents submitted for plagiarism checking</p>
+                
+                <div class="mt-6 space-y-6">
+                    @foreach ($documents as $document)
+                        <div class="flex items-start">
+                            <div class="bg-amber-100 p-3 rounded-md">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                            </div>
+                            <div class="ml-4">
+                                <h3 class="text-lg font-medium text-gray-800">{{ $document->title }}</h3>
+                                <p class="text-gray-600 text-sm">Submitted by {{ $document->user->name ?? 'Unknown' }} • {{ $document->similarity_percentage }}% similarity</p>
+                                <p class="text-gray-500 text-xs mt-1">{{ $document->created_at->format('d M Y, H:i') }}</p>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
               </div>
-              <div class="ml-4">
-                <h3 class="text-lg font-medium text-gray-800">Journal Article Submission</h3>
-                <p class="text-gray-600 text-sm">Submitted by Sarah Wilson • 18% similarity</p>
-                <p class="text-gray-500 text-xs mt-1">
-
-                </p>                
-              </div>
-            </div>
-            
           </div>
         </div>
       </div>
