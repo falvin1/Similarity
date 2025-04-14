@@ -13,4 +13,23 @@ class Document extends Model {
     public function user() {
         return $this->belongsTo(User::class);
     }
+    public function getStatusAttribute()
+    {
+        if ($this->similarity_percentage > 40) {
+            return 'plagiarized';
+        } elseif ($this->similarity_percentage >= 31 && $this->similarity_percentage <= 40) {
+            return 'suspicious';
+        } else {
+            return 'clean';
+        }
+    }
+    public function getStatusColorAttribute()
+    {
+        return match ($this->status) {
+            'plagiarized' => 'red',
+            'suspicious' => 'yellow',
+            'clean' => 'green',
+            default => 'gray',
+        };
+    }
 }

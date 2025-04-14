@@ -21,7 +21,6 @@
                 <!-- Search & Actions -->
                 <div class="flex flex-wrap gap-4 items-center mb-6">
                     <input type="text" placeholder="Search users..." class="flex-1 px-4 py-2 border rounded-md text-gray-700 focus:ring focus:ring-blue-300">
-
                 </div>
 
                 <!-- User Table -->
@@ -42,15 +41,24 @@
                                     <td class="py-3 px-4">{{ $user->name }}</td>
                                     <td class="py-3 px-4">{{ $user->email }}</td>
                                     <td class="py-3 px-4">
-                                        @if($user->is_admin)
-                                            <span class="bg-blue-200 text-blue-800 px-2 py-1 rounded text-sm">Admin</span>
-                                        @else
-                                            <span class="bg-gray-200 px-2 py-1 rounded text-sm">User</span>
-                                        @endif
+                                    @if($user->role === 'admin')
+                                        <span class="bg-blue-200 text-blue-800 px-2 py-1 rounded text-sm">Admin</span>
+                                    @else
+                                        <span class="bg-gray-200 px-2 py-1 rounded text-sm">User</span>
+                                    @endif
                                     </td>
                                     <td class="py-3 px-4">{{ $user->created_at->format('d/m/Y') }}</td>
                                     <td class="py-3 px-4 text-center">
-                                        <a href="#" class="text-red-600 hover:underline ml-2">Delete</a>
+                                        <form action="{{ route('users.destroy', $user->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-800">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fill-rule="evenodd" d="M6 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+                                                    <path fill-rule="evenodd" d="M4 5a1 1 0 011-1h10a1 1 0 011 1v1H4V5zm2 2h8v9a2 2 0 01-2 2H8a2 2 0 01-2-2V7z" clip-rule="evenodd" />
+                                                </svg>
+                                            </button>
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach

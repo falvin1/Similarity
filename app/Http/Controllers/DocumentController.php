@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Redirect;
 use Smalot\PdfParser\Parser; // Import PDF Parser
 
@@ -20,7 +21,7 @@ class DocumentController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|mimes:pdf|max:2048',
+            'file' => 'required|mimes:pdf|max:20480',
         ]);
     
         Log::info('File received:', ['filename' => $request->file('file')->getClientOriginalName()]);
@@ -28,7 +29,7 @@ class DocumentController extends Controller
         $filePath = $file->store('documents', 'public');
     
         try {
-            // Kirim file ke Flask untuk preprocessing (multipart/form-data)
+    
             $response = Http::withoutVerifying()->attach(
                 'file', file_get_contents($file->getRealPath()), $file->getClientOriginalName()
             )->post('http://127.0.0.1:5000/preprocess');
@@ -39,7 +40,7 @@ class DocumentController extends Controller
     
             $responseData = $response->json();
     
-            // Simpan dokumen ke database
+      
             $document = Document::create([
                 'user_id' => Auth::id(), 
                 'title' => $file->getClientOriginalName(),
@@ -48,7 +49,7 @@ class DocumentController extends Controller
                 'file_path' => $filePath,
             ]);
     
-            // Ambil semua dokumen referensi
+            
             $references = ReferenceDocument::whereNotNull('preprocessed_content')->get(['id', 'title', 'preprocessed_content']);
     
             if ($references->isEmpty()) {
@@ -67,10 +68,7 @@ class DocumentController extends Controller
                 return redirect()->back()->with('error', 'References cannot be empty');
             }
     
-            // Tambahkan Log untuk Debugging
-
-    
-            // Kirim ke Flask untuk pengecekan plagiarisme (multipart/form-data untuk file, JSON untuk references)
+           
             $formattedReferences = ['references' => $referencesData];
             $jsonString = json_encode($formattedReferences);
 
@@ -90,7 +88,7 @@ class DocumentController extends Controller
             $comparisons = $plagiarismResult['comparisons'] ?? [];
             
             
-            // Cari similarity tertinggi
+            
             $highest = collect($comparisons)->sortByDesc('similarity')->first();
             if ($highest) {
                 $document->similarity_percentage = $highest['similarity'];
@@ -109,9 +107,9 @@ class DocumentController extends Controller
             }
 
             $history = DocumentHistory::with('referenceDocument')->where('document_id', $document->id)->first();
-            $googleDriveLink_history = $history && $history->referenceDocument ? $history->referenceDocument->google_drive_link : null;
+         
 
-            // Redirect ke view dengan hasil similarity
+            
             return redirect()->back()->with('result', [
                 'highest_similarity' => $highest,
                 'comparisons' => $comparisons,
@@ -122,7 +120,7 @@ class DocumentController extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }    
-public function adminPage($page)
+    public function adminPage($page)
     {
         
         $totalDocuments = Document::count();
@@ -145,6 +143,25 @@ public function adminPage($page)
         }
     
         abort(404);
+    }
+    public function documentPage(){
+        $documents = Document::with('user')->latest()->get();
+
+
+        return view('admin.documents', compact('documents'));
+    }
+
+    public function destroy($id)
+    {
+        $document = Document::findOrFail($id);
+
+        // Hapus file dari penyimpanan
+        Storage::delete($document->file_path);
+
+        // Hapus dari database
+        $document->delete();
+
+        return redirect()->back()->with('success', 'Dokumen berhasil dihapus.');
     }
     public function list()
     {
