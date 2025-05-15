@@ -183,6 +183,9 @@
     </div>
 
     <script>
+        document.getElementById('userMenuButton').addEventListener('click', function () {
+            document.getElementById('userMenu').classList.toggle('hidden');
+        });
         const fileUpload = document.getElementById('file-upload');
         const fileNameDisplay = document.getElementById('file-name');
         const submitButton = document.getElementById('submit-button');

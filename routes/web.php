@@ -33,15 +33,16 @@ Route::middleware('auth:web', 'role:user')->group(function () {
 Route::middleware(['auth:web', 'role:admin'])->group(function () {
 
     Route::get('/admin/users', [UsersController::class, 'usersPage'])->name('admin.users');
+    Route::put('/admin/users/{user}', [UsersController::class, 'update'])->name('users.update');
     Route::get('/admin/profile', [ProfileController::class, 'editAdmin'])->name('admin.profile.edit');
     Route::patch('/admin/profile', [ProfileController::class, 'update'])->name('admin.profile.update');
     Route::delete('/admin/profile', [ProfileController::class, 'destroy'])->name('admin.profile.destroy');
     Route::get('/download-files', [GoogleDriveController::class, 'downloadAndSaveToDatabase'])->name('download.files');
     Route::get('/admin/documents', [DocumentController::class, 'documentPage'])->name('admin.documents');
+    Route::get('/documents/{id}/download', [DocumentController::class, 'download'])->name('documents.download');
     Route::get('/admin/{page}', [DocumentController::class, 'adminPage'])->name('admin.page');
     Route::delete('/documents/{id}', [DocumentController::class, 'destroy'])->name('documents.destroy');
     Route::delete('/users/{user}', [UsersController::class, 'destroy'])->name('users.destroy')->middleware('auth');
-
 
 });
     

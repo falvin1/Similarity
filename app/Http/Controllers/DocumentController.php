@@ -213,8 +213,23 @@ class DocumentController extends Controller
             ], 500);
         }
     }
+    public function download($id)
+    {
+        $document = Document::findOrFail($id); // Cari dokumen berdasarkan ID
+        Log::info('Document Path: ' . $document->file_path); // Menambahkan log untuk memeriksa path
     
+        // Menggunakan public_path untuk file yang ada di folder storage/public
+        $filePath = public_path('storage/' . $document->file_path); 
     
+        Log::info('Full File Path: ' . $filePath); // Log full path untuk debugging
+    
+        // Cek apakah file ada di penyimpanan
+        if (file_exists($filePath)) {
+            return response()->download($filePath);
+        } else {
+            return abort(404, 'File not found');
+        }
+    }
     public function listReferences()
     {
         $references = ReferenceDocument::all();

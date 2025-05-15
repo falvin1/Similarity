@@ -12,9 +12,26 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from flask_cors import CORS
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from flask_sqlalchemy import SQLAlchemy
 
+db = SQLAlchemy()  # Keep this definition, but initialize it with the app later
+
+# Definisikan model untuk tabel reference_documents
+class ReferenceDocument(db.Model):
+    __tablename__ = 'reference_documents'  # Nama tabel yang sesuai di database Anda
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255))
+    preprocessed_content = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"<ReferenceDocument {self.title}>"
+    
 app = Flask(__name__)
 CORS(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost/testing'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db.init_app(app)  # Initialize the db with the app here
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -71,14 +88,8 @@ def preprocess():
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-
 @app.route('/check-plagiarism', methods=['POST'])
 def check_plagiarism():
-    # print("Received Headers:", request.headers)
-    # print("Received Files:", request.files)
-    # print("Received Form:", request.form)
-    # print("Received JSON:", request.get_json(silent=True))
-
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
 
@@ -88,44 +99,39 @@ def check_plagiarism():
         return jsonify({'error': 'No selected file'}), 400
 
     try:
-        uploaded_text = extract_text_from_pdf(file)
+        # Ekstrak dan preprocess file yang diupload
+        uploaded_text = extract_text_from_pdf(file)  # Gunakan fungsi extract_text_from_pdf
         if uploaded_text is None:
             return jsonify({'error': 'Failed to extract text from PDF'}), 500
 
         uploaded_text = preprocess_text(uploaded_text)
 
-        # Ambil references dari request form
-        references_data = request.form.get('references', None) 
+        # Ambil referensi dari tabel reference_documents di database
+        references_data = ReferenceDocument.query.all()  # Mengambil semua data referensi dari tabel reference_documents
 
         if not references_data:
-            return jsonify({'error': 'References are required'}), 400
+            return jsonify({'error': 'No references found in the database'}), 400
 
-        try:
-            references_data = json.loads(references_data)['references']
-        except (json.JSONDecodeError, TypeError) as e:
-            print(f"❌ ERROR parsing references: {str(e)}")  # Debugging
-            return jsonify({'error': 'Invalid references JSON'}), 400
+        # Ambil preprocessed_content dari setiap referensi
+        preprocessed_refs = [ref.preprocessed_content for ref in references_data]
 
-        all_texts = [uploaded_text] + [preprocess_text(ref['content']) for ref in references_data]
+        # Gabungkan dokumen user + semua referensi
+        all_texts = [uploaded_text] + preprocessed_refs
 
+        # Hitung TF-IDF
         vectorizer = TfidfVectorizer()
         tfidf_matrix = vectorizer.fit_transform(all_texts)
-        
-        uploaded_vector = tfidf_matrix[0]
 
+        # Hitung cosine similarity
+        similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
+
+        # Buat response
         comparisons = []
-
         for i, ref in enumerate(references_data):
-            ref_id = ref['id']
-            ref_title = ref['title']
-            ref_vector = tfidf_matrix[i + 1]
-
-            similarity_score = cosine_similarity(uploaded_vector, ref_vector)[0][0]
-
             comparisons.append({
-                'reference_id': ref_id,
-                'reference_title': ref_title,
-                'similarity': round(similarity_score * 100, 2),
+                'reference_id': ref.id,
+                'reference_title': ref.title,
+                'similarity': round(similarities[i] * 100, 2),
             })
 
         return jsonify({
@@ -134,8 +140,9 @@ def check_plagiarism():
         })
 
     except Exception as e:
-        print(f"❌ ERROR in check_plagiarism: {str(e)}")  # Debugging
+        print(f"❌ ERROR in check_plagiarism: {str(e)}")
         return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
